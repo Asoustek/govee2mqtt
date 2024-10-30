@@ -12,7 +12,7 @@ use std::collections::HashMap;
 use std::sync::Arc;
 use tokio::time::{sleep, Duration};
 
-pub const POLL_INTERVAL: Lazy<chrono::Duration> = Lazy::new(|| chrono::Duration::seconds(900));
+pub const POLL_INTERVAL: Lazy<chrono::Duration> = Lazy::new(|| chrono::Duration::seconds(/*900*/10));
 
 #[derive(clap::Parser, Debug)]
 pub struct ServeCommand {
@@ -74,6 +74,7 @@ async fn poll_single_device(state: &StateHandle, device: &Device) -> anyhow::Res
 
 async fn periodic_state_poll(state: StateHandle) -> anyhow::Result<()> {
     sleep(Duration::from_secs(20)).await;
+    log::info!("periodic poll started")
     loop {
         for d in state.devices().await {
             if let Err(err) = poll_single_device(&state, &d).await {
@@ -81,7 +82,7 @@ async fn periodic_state_poll(state: StateHandle) -> anyhow::Result<()> {
             }
         }
 
-        sleep(Duration::from_secs(60)).await;
+        sleep(Duration::from_secs(10)).await;
     }
 }
 
