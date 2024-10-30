@@ -82,9 +82,10 @@ impl EntityInstance for DeviceLight {
             Some(device_state) => {
                 log::trace!("LightConfig::notify_state: state is {device_state:?}");
 
+                let is_online = device_state.online.unwrap_or(false);
                 let is_on = device_state.light_on.unwrap_or(false);
 
-                let light_state = if is_on {
+                let light_state = if (is_on && is_online) {
                     if device_state.kelvin == 0 {
                         json!({
                             "state": "ON",
@@ -107,7 +108,12 @@ impl EntityInstance for DeviceLight {
                         })
                     }
                 } else {
-                    json!({"state":"OFF"})
+                    if is_online == false {
+                        json!({"state":"UNAVAILABLE"})
+                    } else {
+                        json!({"state":"OFF"})
+                    }
+ 
                 };
 
                 client
